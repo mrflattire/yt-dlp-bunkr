@@ -2,10 +2,16 @@
 
 A yt-dlp plugin adding native support for bunkr.* file (`/f/`, `/v/`, `/i/`) and album (`/a/`) pages.
 
+**NOT USABLE YET. Still in Development. fork to help.**
+
 ## Install
 
+Requires yt-dlp>=2024.03.10
+
 ```bash
-pip install yt-dlp yt-dlp-bunkr
+pip install yt-dlp
+
+pip install git+https://github.com/mrflattire/yt-dlp-bunkr.git
 ```
 
 ## Usage
