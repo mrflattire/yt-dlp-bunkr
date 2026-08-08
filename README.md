@@ -43,7 +43,7 @@ Create a `yt-dlp-plugins` directory alongside the binary/source root and in it a
 ### 3. pip install (from source, until this is published)
 
 ```bash
-pip install git+https://github.com/YOUR_USERNAME/yt-dlp-bunkr
+pip install git+https://github.com/mrflattire/yt-dlp-bunkr
 # or, from a local checkout:
 pip install /path/to/yt-dlp-bunkr
 ```
