@@ -4,9 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "yt-dlp-bunkr"
-version = "0.1.0-beta.1"
+version = "0.1.0"
 description = "yt-dlp plugin adding native support for bunkr.* file and album pages"
-readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "yt-dlp>=2024.03.10",
@@ -15,6 +14,10 @@ dependencies = [
 
 [tool.ruff.lint.per-file-ignores]
 "yt_dlp_plugins/extractor/bunkr.py" = ["ALL"]
+
+# For yt-dlp's plugin auto-discovery: the
+# package must ship a `yt_dlp_plugins` namespace folder (no __init__.py in
+# it. 
 
 [tool.hatch.build.targets.wheel]
 packages = ["yt_dlp_plugins"]
