@@ -100,7 +100,7 @@ frequently not bundled; Homebrew/Nix/Arch builds commonly ship without it).
 There are two genuinely different signing flows, both confirmed against real
 captured traffic, not guessed. 
 
-- **Album-sourced** (`BunkrAlbumIE` dispatching into `BunkrIE`): a two-step mint —
+- **Album-sourced** (`BunkrAlbumIE` dispatching into `BunkrIE`): a two-step mint
   metadata API, then sign, using the file's numeric id, passed through cheaply via
   a `#_fid=<id>` URL fragment so nothing is re-fetched.
 - **Direct file-page visit**: a single page fetch for the embedded `jsCDN` value,
@@ -112,7 +112,7 @@ references back to `BunkrIE` rather than minting everything up front, so
 files outside your selection are never minted.
 
 A shared, persistent `curl_cffi` session is used across requests (rather than a
-fresh TLS handshake per call) with automatic reset-and-retry on failure — repeated
+fresh TLS handshake per call) with automatic reset-and-retry on failure. Repeated
 cold handshakes are exactly the kind of pattern that trips fingerprint-based
 rate-limiting on a site already doing TLS-level bot detection.
 
