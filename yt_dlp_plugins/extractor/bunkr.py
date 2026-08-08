@@ -4,8 +4,6 @@ import time
 import urllib.parse
 
 from curl_cffi import requests as curl_requests
-
-# Plugin Requirement: Replace relative imports with absolute yt_dlp imports
 from yt_dlp.extractor.common import InfoExtractor
 from yt_dlp.utils import ExtractorError, determine_ext, int_or_none
 
@@ -31,6 +29,7 @@ _SHARED_SESSION = None
 
 
 def _get_session():
+    """Returns a persistent curl_cffi Session to keep TCP/TLS sockets open."""
     global _SHARED_SESSION
     if _SHARED_SESSION is None:
         _SHARED_SESSION = curl_requests.Session(impersonate='chrome124')
@@ -38,6 +37,7 @@ def _get_session():
 
 
 def _reset_session():
+    """Resets the persistent session if Cloudflare drops the TCP socket."""
     global _SHARED_SESSION
     if _SHARED_SESSION is not None:
         with contextlib.suppress(Exception):
@@ -54,6 +54,7 @@ def _unescape_js_string(s):
 
 
 def _fetch_page_html(url):
+    """Fetches HTML using the shared session with automated reset retries."""
     last_exception = None
     for attempt in range(3):
         try:
@@ -61,7 +62,7 @@ def _fetch_page_html(url):
             res = session.get(url, headers=_BASE_HEADERS, timeout=30)
             res.raise_for_status()
             return res.text
-        except (curl_requests.exceptions.RequestException, Exception) as e:
+        except Exception as e:
             last_exception = e
             _reset_session()
             if attempt < 2:
@@ -99,6 +100,7 @@ def _parse_album_files(html):
 
 
 def _mint_via_album_flow(true_file_id):
+    """Album-sourced flow using a persistent HTTP/2 session to prevent TLS handshake spam."""
     if not true_file_id or true_file_id == 'None':
         raise ExtractorError(f'Invalid or empty Bunkr file id: {true_file_id!r}', expected=True)
 
@@ -114,6 +116,7 @@ def _mint_via_album_flow(true_file_id):
         try:
             session = _get_session()
 
+            # Step 1: Query Metadata API
             meta_res = session.post(
                 'https://dl.bunkr.cr/api/_001_v2',
                 json={'id': str(true_file_id)},
@@ -134,6 +137,7 @@ def _mint_via_album_flow(true_file_id):
                     expected=True,
                 )
 
+            # Step 2: Sign path
             encoded_path = urllib.parse.quote(storage_path)
             sign_res = session.get(
                 f'https://glb-apisign.cdn.cr/sign?path={encoded_path}',
@@ -156,7 +160,7 @@ def _mint_via_album_flow(true_file_id):
 
         except ExtractorError:
             raise
-        except (curl_requests.exceptions.RequestException, Exception) as e:
+        except Exception as e:
             last_exception = e
             _reset_session()
             if attempt < 2:
@@ -166,6 +170,7 @@ def _mint_via_album_flow(true_file_id):
 
 
 def _mint_via_direct_page_flow(slug):
+    """Standalone-visit flow using a persistent HTTP/2 session."""
     html = _fetch_page_html(f'https://bunkr.cr/f/{slug}')
 
     cdn_match = _JS_CDN_RE.search(html)
@@ -216,7 +221,7 @@ def _mint_via_direct_page_flow(slug):
 
         except ExtractorError:
             raise
-        except (curl_requests.exceptions.RequestException, Exception) as e:
+        except Exception as e:
             last_exception = e
             _reset_session()
             if attempt < 2:
